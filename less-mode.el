@@ -35,6 +35,10 @@
   "Less compiler command"
   :group 'less)
 
+(defcustom less-lessc-command-c "lessc --no-color -x"
+  "Less compiler command"
+  :group 'less)
+
 (defcustom less-compile-at-save t
   "If not nil, Less buffers will be compiled on each save"
   :type 'boolean
@@ -48,7 +52,8 @@
 (defun less-compile ()
   "Compiles the current buffer"
   (interactive)
-  (compile (concat less-lessc-command " " buffer-file-name)))
+  ;;(compile (concat less-lessc-command " " buffer-file-name))
+  (compile (concat less-lessc-command-c " " buffer-file-name " > " (replace-regexp-in-string "/less/" "/css/" buffer-file-name) ".css")))
 
 (defun less-compile-maybe ()
   "Runs `less-compile' on if `less-compile-at-save' is not nil"
@@ -73,9 +78,11 @@
                '("! \\(.*\\): \\(.*\\)"
                  nil nil nil 2)))
 
-(define-derived-mode less-mode css-mode "Less"
+(define-derived-mode less-mode c-mode "Less"
   "Major mode for editing Less files, http://lesscss.org"
   (run-hooks 'css-mode-hook)
+  (c-set-offset 'label' +)
+  (c-set-offset 'defun-close' /)
   (when (featurep 'flymake) (flymake-mode t))
   (font-lock-add-keywords nil less-font-lock-keywords)
   (add-hook 'after-save-hook 'less-compile-maybe nil t))
